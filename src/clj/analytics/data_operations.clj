@@ -6,7 +6,7 @@
    [cognitect.transit :as tr]
    [clojure.java.io :as io]
    [kixi.stats.core
-    :refer  [standard-deviation correlation]])
+    :refer  [standard-deviation correlation correlation-matrix]])
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (defonce data-store (atom {:data-chart-1 nil}))
@@ -24,34 +24,16 @@
                       (.listFiles %)) dirs))))
 
 (def ccrc
-  (:cervical-cancer-risk-classification
-   resources))
+  (:cervical-cancer-risk-classification   resources))
 
-(def data (with-open [input (io/reader (first  ccrc))]
-            (let  [csv (read-csv input)
-                   head (first csv)
-                   tail (rest csv)]
-              (sc/mappify {:keyify false} (doall (cons head tail))))))
+(def raw-csv (-> ccrc first io/reader read-csv))
 
-(def data (with-open [input (io/reader (first  ccrc))]
-            (let  [csv (read-csv input)
-                   head (map ->kebab-case (first csv))
-                   tail (rest csv)]
-              (sc/mappify (doall (cons head tail))))))
+(defn    csv->data [csv]
+  (let  [head (map ->kebab-case (first csv))
+         tail (rest csv)]
+  (vec (sc/mappify (doall (cons head tail))))))
 
-#_(defn stat-NA [dt]
-    (into {}
-          (for [a-key (-> data first keys)
-                :let [entries (map #(get % a-key) data)
-                      total-entries (count entries)
-                      null-entries
-                      (count (filter #(= "?" %)
-                                     entries))]]
-            [a-key {"N/A" null-entries
-                    "N/A %" (float
-                             (* 100
-                                (/ null-entries
-                                   total-entries)))}])))
+(def data (csv->data raw-csv))
 
 (defn stat-NA [dt]
   (into {}
@@ -59,12 +41,19 @@
               :let [entries (map #(get % a-key) data)
                     total-entries (count entries)
                     null-entries  (count
-                                    (filter #(= "?" %)
-                                            entries))]]
+                                   (filter #(= "?" %)
+                                           entries))]]
           [a-key {:N/A null-entries
                   :N/A-% (float
                           (* 100  (/ null-entries
                                      total-entries)))}])))
+
+(def csv-fixed
+  (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
+
+(def data-fixed  (csv->data  csv-fixed))
+
+;; (transduce identity (correlation-matrix  (into {} (map #(vector % %) (keys (first data-fixed))))) data-fixed )
 
 (defn update-data []
   (swap! data-store
