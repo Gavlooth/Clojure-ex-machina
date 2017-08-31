@@ -8,7 +8,9 @@
    [clojure.string :as str]
    [kixi.stats.core
     :refer  [standard-deviation correlation correlation-matrix]])
-  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
+           [org.apache.commons.lang3 StringUtils ]))
+
 
 (defn ->integer?  [x]
   (if  (integer? x)
@@ -48,13 +50,14 @@
   (:cervical-cancer-risk-classification   resources))
 
 
-
 (def raw-csv (-> ccrc first io/reader read-csv))
 
 (def the-keys (map  (comp  keyword ->kebab-case )  (first raw-csv)))
 
+
 (defn- validize-keywords [st]
- (as-> st  $  (str/replace $  #"\(" "<")    (str/replace $ #"\)" ">")  (->kebab-case $)))
+ (as-> st  $  (StringUtils/replace $ "(" "<" )
+   (StringUtils/replace $ ")" ">" )   (->kebab-case $)))
 
 
 (defn csv->data [[head & tail]  & {:keys [ns]} ]
@@ -63,11 +66,6 @@
     (mapv  zipmap (repeat legend) tail)))
 
 (def data (csv->data raw-csv ))
-
-;; (s/def ::data (apply s/map-of (repeat   x-integer?)))
-
-
-
 
 
 
@@ -90,21 +88,15 @@
 (def legend  (keys (first data)))
 
 
-#_(def map-of  (:st-ds :smokes-(years) :hormonal-contraceptives-(years) :st-ds:-time-since-last-diagnosis :st-ds:-hpv :st-ds:-hiv :iud :st-ds-(number) :dx :age :num-of-pregnancies :st-ds:pelvic-inflammatory-disease :hormonal-contraceptives :st-ds:cervical-condylomatosis :st-ds:-number-of-diagnosis :st-ds:-aids :biopsy :st-ds:vaginal-condylomatosis :st-ds:molluscum-contagiosum :dx:-cin :first-sexual-intercourse :st-ds:vulvo-perineal-condylomatosis :smokes-(packs/year) :st-ds:-hepatitis-b :citology :st-ds:condylomatosis :st-ds:genital-herpes :smokes :st-ds:-time-since-first-diagnosis :schiller :st-ds:syphilis :dx:-hpv :dx:-cancer :number-of-sexual-partners :hinselmann :iud-(years)))
-
-
 (def data-fixed  (csv->data  csv-fixed))
-
 
 (def freq (for [a-key legend]
            {a-key  (frequencies (map a-key data-fixed))}))
-
 
 (-> data-fixed first vals)
 
 ;; (def continuous-variables :smokes-(years) )
 (defn  descrite-variables  )
-
 
 (defn update-data []
   (swap! data-store
