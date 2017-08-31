@@ -7,7 +7,9 @@
    [clojure.java.io :as io]
    [kixi.stats.core
     :refer  [standard-deviation correlation correlation-matrix]])
-  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]))
+  (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
+           [org.apache.commons.lang3 StringUtils ]))
+
 
 (defonce data-store (atom {:data-chart-1 nil}))
 
@@ -28,10 +30,12 @@
 
 (def raw-csv (-> ccrc first io/reader read-csv))
 
-(defn    csv->data [csv]
-  (let  [head (map ->kebab-case (first csv))
-         tail (rest csv)]
-  (vec (sc/mappify (doall (cons head tail))))))
+(defn par->brak [s]
+(StringUtils/replace (StringUtils/replace s "(" "<" ) ")" ">" ))
+
+(defn csv->data [ [head & tail] ]
+  (let  [new-head (map  #(par->brak (->kebab-case %)) head) ]
+  (vec (sc/mappify (doall (cons new-head tail))))))
 
 (def data (csv->data raw-csv))
 
@@ -52,6 +56,8 @@
   (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
 
 (def data-fixed  (csv->data  csv-fixed))
+
+(par->brak "hormonal-contraceptives-(years)" )
 
 ;; (transduce identity (correlation-matrix  (into {} (map #(vector % %) (keys (first data-fixed))))) data-fixed )
 

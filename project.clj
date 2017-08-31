@@ -17,10 +17,13 @@
                  [philoskim/debux "0.3.9"]
                  [hiccup "RELEASE"]
                  [com.cognitect/transit-clj "0.8.300"]
+                 [org.apache.commons/commons-lang3 "3.6"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  [kixi/stats "0.3.9"]]
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-environ "1.1.0"]]
+
+
 
   :min-lein-version "2.6.1"
 
@@ -36,7 +39,7 @@
   ;; because that's where our development helper functions like (go) and
   ;; (browser-repl) live.
   :repl-options {:init-ns user}
-
+;  :figwheel
   :cljsbuild {:builds
               [{:id "app"
                 :source-paths ["src/cljs" "src/cljc"]
@@ -59,6 +62,7 @@
                            :pretty-print false}}]}
 
   :figwheel {:css-dirs ["resources/public/css"]  ;; watch and update CSS
+             :server-port 5309
              :server-logfile "log/figwheel.log"}
   :profiles {:dev
              {:dependencies [[figwheel "0.5.11"]
