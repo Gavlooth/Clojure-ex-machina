@@ -11,25 +11,47 @@
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [org.apache.commons.lang3 StringUtils]))
 
+;;intersting. Saved here for later
+#_(s/def ::id  (s/and  (s/or :int integer?
+                             :str string?)
+                       (s/conformer  (fn  [[tag x]]
+                                       (case tag
+                                         :int x
+                                         :str  (Integer/parseInt x))))))
+
+#_(s/def :conformers/int
+    (s/conformer  (fn  [x]
+                    (cond
+                      (integer? x) x
+                      (re-matches #"\d+" x)  (edn/read-string x)
+                      :else :cljs.spec.alpha/invalid)
+                    #_(s/def :data.subscription/quantity :conformers/int) (s/def :data/subscription  (s/keys :req-un  [:data.subscription/quantity])))))
+
 (defn ->?integer  [x]
   (if  (integer? x)
     x
-    (if  (string? x)
-      (try
-        (Integer/parseInt x)
-        (catch Exception e
-          :clojure.spec/invalid))
-      :clojure.spec/invalid)))
+    (when (string? x)
+      #spy/t (try
+               (Integer/parseInt x)
+               (catch Exception e)))))
+
+(def ->integer?
+  (s/conformer  (fn  [x]
+                  (cond
+                    (integer? x) x
+                    (string? x)  (try
+                                   (Integer/parseInt x)
+                                   (catch Exception e))
+
+                    :else :cljs.spec.alpha/invalid))))
 
 (defn ->?double [x]
   (if  (double? x)
     x
-    (if  (string? x)
+    (when (string? x)
       (try
         (Double/parseDouble x)
-        (catch Exception e
-          :clojure.spec/invalid))
-      :clojure.spec/invalid)))
+        (catch Exception e)))))
 
 (defonce data-store (atom {:data-chart-1 nil}))
 
@@ -52,7 +74,7 @@
 
 (defn- restructure-keyword [st]
   (as-> st  $  (StringUtils/replace $ "(" "<")
-        (StringUtils/replace $ ")" ">")   (->kebab-case $)))
+        (StringUtils/replace $ ")" ">")  (StringUtils/replace $ "/" "-per-") (->kebab-case $)))
 
 (def the-keys (map (comp keyword  ->kebab-case restructure-keyword)   (first raw-csv)))
 
@@ -69,7 +91,7 @@
 (s/def ::num-of-pregnancies  ->?integer)
 (s/def ::smokes  ->?integer)
 (s/def ::smokes-<years>  ->?double)
-(s/def ::smokes-<packs/year>  ->?double)
+(s/def ::smokes-<packs-per-year>  ->?double)
 (s/def ::hormonal-contraceptives  ->?integer)
 (s/def ::hormonal-contraceptives-<years>  ->?double)
 (s/def ::iud  ->?integer)
@@ -105,7 +127,7 @@
           [::age  ::number-of-sexual-partners
            ::first-sexual-intercourse
            ::num-of-pregnancies  ::smokes
-           ::smokes-<years>  ::smokes-<packs/year>
+           ::smokes-<years>  ::smokes-<packs-per-year>
            ::hormonal-contraceptives
            ::hormonal-contraceptives-<years>
            ::iud  ::iud-<years>  ::st-ds
@@ -127,6 +149,9 @@
            ::hinselmann ::schiller ::citology
            ::biopsy]))
 
+(defn coerce-csv [data]
+  (map #(s/conform ::data %) data))
+
 (defn stat-NA [dt]
   (into {}
         (for [a-key (-> data first keys)
@@ -147,13 +172,17 @@
 
 (def data-fixed  (csv->data  csv-fixed))
 
+(s/explain ::st-ds (:st-ds (first data-fixed)))
+
+(def coerced
+  (coerce-csv data-fixed))
+
+(first coerced)
+
 (def freq (for [a-key legend]
             {a-key  (frequencies (map a-key data-fixed))}))
 
 (-> data-fixed first vals)
-
-;; (def continuous-variables :smokes-(years) )
-;; (defn  descrite-variables  )
 
 (defn update-data []
   (swap! data-store
