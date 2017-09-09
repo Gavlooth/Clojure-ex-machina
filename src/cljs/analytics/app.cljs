@@ -49,6 +49,14 @@
 (def data-correlation-labels  (parse-data-tag correlation-data-element
                              "data-heatmap-correlation-labels" ))
 
+(def uper-triangular 
+  (clog (vec (map-indexed
+     (fn  [i x]
+                 (vec  (map-indexed
+                    (fn [j y] (when-not (< i j) y)) x)))
+                data-correlation-matrix))))
+
+
 (def correlation-data-matrix
   (clj->js  data-correlation-matrix))
 
@@ -59,7 +67,7 @@
 (.plot  js/Plotly correlation-data-element
        (clj->js  [{:colorscale [[0 "#B22222"]
                                 [1 "#20B2AA"]] 
-                   :z (reverse correlation-data-matrix)
+                   :z (reverse uper-triangular)
                    :x  correlation-data-labels 
                    :y (reverse  correlation-data-labels)     
                    :xgap 2

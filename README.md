@@ -1,12 +1,18 @@
 # analytics
 
-FIXME: description
+FIXME: A First attempt of data exploration in clojure  
 
 ## Installation
 
-Download from http://example.com/FIXME.
-
+Download and install the leiningen 
 ## Usage
+
+run lein cljsbuild to build the clojurescript files
+Start a repl with lein repl
+run (start-server) to start a jetty server on localhost:12345
+optionaly run (fg/start-figwheel!) to start the figwheel 
+file server and edit clojurescript realtime 
+
 
 FIXME: explanation
 
