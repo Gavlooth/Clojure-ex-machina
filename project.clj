@@ -14,7 +14,7 @@
                  [semantic-csv "0.2.1-alpha1"]
                  [compojure "1.6.0"]
                  [cheshire "5.8.0"]
-                 [philoskim/debux "0.3.9"]
+                 [philoskim/debux "0.3.12"]
                  [hiccup "RELEASE"]
                  [com.cognitect/transit-clj "0.8.300"]
                  [org.apache.commons/commons-lang3 "3.6"]
@@ -44,8 +44,6 @@
               [{:id "app"
                 :source-paths ["src/cljs" "src/cljc"]
                 :figwheel true
-                ;; :figwheel {:on-jsload "analytics.system/reset"}\
-
                 :compiler {:main analytics.app
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/analytics.js"
@@ -61,9 +59,6 @@
                            :optimizations :advanced
                            :pretty-print false}}]}
 
-  :figwheel {:css-dirs ["resources/public/css"]  ;; watch and update CSS
-             :server-port 5309
-             :server-logfile "log/figwheel.log"}
   :profiles {:dev
              {:dependencies [[figwheel "0.5.11"]
                              [figwheel-sidecar "0.5.11"]

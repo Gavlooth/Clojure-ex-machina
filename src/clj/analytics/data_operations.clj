@@ -11,49 +11,28 @@
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [org.apache.commons.lang3 StringUtils]))
 
-;;intersting. Saved here for later
-#_(s/def ::id  (s/and  (s/or :int integer?
-                             :str string?)
-                       (s/conformer  (fn  [[tag x]]
-                                       (case tag
-                                         :int x
-                                         :str  (Integer/parseInt x))))))
-
-#_(s/def :conformers/int
-    (s/conformer  (fn  [x]
-                    (cond
-                      (integer? x) x
-                      (re-matches #"\d+" x)  (edn/read-string x)
-                      :else :cljs.spec.alpha/invalid)
-                    #_(s/def :data.subscription/quantity :conformers/int) (s/def :data/subscription  (s/keys :req-un  [:data.subscription/quantity])))))
-
-(defn ->?integer  [x]
-  (if  (integer? x)
-    x
-    (when (string? x)
-      #spy/t (try
-               (Integer/parseInt x)
-               (catch Exception e)))))
-
-(def ->integer?
-  (s/conformer  (fn  [x]
+(def ->?double
+  (s/conformer  (fn [x]
                   (cond
                     (integer? x) x
                     (string? x)  (try
-                                   (Integer/parseInt x)
-                                   (catch Exception e))
+                                   (Double/parseDouble x)
+                                   (catch Exception _
+                                     :clojure.spec.alpha/invalid))
+                    :else :clojure.spec.alpha/invalid))))
 
-                    :else :cljs.spec.alpha/invalid))))
+(def ->?integer
+  (s/conformer
+   (fn  [x]
+     (cond
+       (integer? x) x
+       (string? x)  (try
+                      (Integer/parseInt (StringUtils/removeEnd  x ".0"))
+                      (catch Exception _
+                        :clojure.spec.alpha/invalid))
+       :else :clojure.spec.alpha/invalid))))
 
-(defn ->?double [x]
-  (if  (double? x)
-    x
-    (when (string? x)
-      (try
-        (Double/parseDouble x)
-        (catch Exception e)))))
-
-(defonce data-store (atom {:data-chart-1 nil}))
+(defonce data-store (atom {:data-NA nil :corr-data nil}))
 
 (defn map->transit-json [a-map]
   (let [out  (ByteArrayOutputStream. 4096)
@@ -79,11 +58,19 @@
 (def the-keys (map (comp keyword  ->kebab-case restructure-keyword)   (first raw-csv)))
 
 (defn csv->data [[head & tail]  & {:keys [ns]}]
-  (let  [legend (mapv #(if ns (keyword  ns (restructure-keyword %))
+  (let  [labels (mapv #(if ns (keyword  ns (restructure-keyword %))
                            (keyword  (restructure-keyword %))) head)]
-    (mapv  zipmap (repeat legend) tail)))
+    (mapv  zipmap (repeat labels) tail)))
 
 (def data (csv->data raw-csv))
+
+(def csv-fixed
+  (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
+
+(def labels  (vec  (keys (first data))))
+
+(def pure-labels (first raw-csv))
+(def data-fixed  (csv->data  csv-fixed))
 
 (s/def ::age  ->?integer)
 (s/def ::number-of-sexual-partners ->?integer)
@@ -152,7 +139,9 @@
 (defn coerce-csv [data]
   (map #(s/conform ::data %) data))
 
-(defn stat-NA [dt]
+
+
+  (defn stat-NA [dt]
   (into {}
         (for [a-key (-> data first keys)
               :let [entries (map #(get % a-key) data)
@@ -165,27 +154,50 @@
                           (* 100  (/ null-entries
                                      total-entries)))}])))
 
-(def csv-fixed
-  (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
-
-(def legend  (keys (first data)))
-
-(def data-fixed  (csv->data  csv-fixed))
-
-(s/explain ::st-ds (:st-ds (first data-fixed)))
-
-(def coerced
+(def data-coerced
   (coerce-csv data-fixed))
 
-(first coerced)
+(def freq (for [a-key labels]
+            {a-key  (frequencies (map a-key data-coerced))}))
 
-(def freq (for [a-key legend]
-            {a-key  (frequencies (map a-key data-fixed))}))
+(def correlations
+  (transduce identity (correlation-matrix  (zipmap labels labels))  data-coerced))
 
-(-> data-fixed first vals)
+(def indexies
+  (map (fn [[[x y] z]]
+         [(.indexOf labels x) ]) correlations ))
+
+
+(defn map-indexies [labels correlations]
+ (let [get-index #(.indexOf labels %)]
+  (->> correlations
+   (map (fn [[[x y] z]]
+         [[(get-index x)
+           (get-index y) ]  z]))
+   (concat (mapv (fn [x] [ [x x] 1] ) (range 36)))
+   (sort-by  (comp  second first))
+   (sort-by ffirst))))
+
+
+(def corplot-matrix
+(->> correlations
+   (map-indexies labels)
+   (map  (fn [[[x y] z ]] z))
+   (partition 36) ) )
+
 
 (defn update-data []
   (swap! data-store
-         assoc :data-chart-1
-         (map->transit-json (stat-NA data))))
+         assoc :data-NA
+         (map->transit-json (stat-NA data)))
+
+  (swap! data-store
+         assoc :correlation-data-matrix
+         (map->transit-json corplot-matrix))
+
+(swap! data-store
+         assoc :correlation-data-labels
+         (map->transit-json pure-labels)))
+
+
 
