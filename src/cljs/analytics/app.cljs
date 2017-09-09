@@ -77,6 +77,6 @@
                 :width 1000
                 :height 1000
                 :margin {:t 300
-                         :l 150 }
+                         :l 230 }
                 :xaxis {:side "top"
-                        :tickangle -30}}))
+                        :tickangle -40}}))
