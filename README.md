@@ -1,33 +1,33 @@
-# analytics
+# Clojure-ex-machina
 
 An early attempt of data exploration in clojure.
-This repository is ment to evolve in a proof of concept of
-how data exploitation can be done using clojure.
-and clojurescript Clojure.
-For now only plots the distribution of NAs as well as the Correlation between variables
-of the cervical canser risk classification data-set from kaggle
+This repository is meant to evolve in a proof of concept of
+how data exploration can be done with clojure.
+and clojurescript.
+For now, only plots the distribution of NAs and the Correlation (Matrix) between variables
+for the cervical canser risk classification data-set from kaggle
 
-The followint tools where used:
+The following tools where used:
 ### Clojure:
-* Mastodon c kixi.stats for the data exploration
+* Mastodon c's kixi.stats for data exploration
 * Clojure.spec for data validation/coercion
 * clojure.data for csv manipulation
 * kamel-case-kebab for proper csv variable name handling
 * Apache commons StringUtils for efficient string manipulation
 
 ### ClojureScript:
-* Dommy.js for dom element manipulation
+* Plumatic/Dommy for dom element manipulation
 * Plotly.js For visualization of the data
 ## Installation
 
-Download and install leiningen then clonre this repository
+Download and install leiningen then clone this repository
 ## Usage
 
-Run lein cljsbuild to build the clojurescript files
-Start a repl with lein repl
-run (start-server) to start a jetty server on localhost:12345
-optionaly run (fg/start-figwheel!) to start the figwheel
-file server and edit clojurescript realtime
+1. From the root of the cloned project run lein cljsbuild to build the clojurescript files 
+2. Start a repl with lein repl
+3. Run (start-server) to start a jetty server on localhost:12345
+4. optionaly run (fg/start-figwheel!) to start the figwheel
+   file server and compile clojurescript realtime
 
 
 <!-- FIXME: explanation -->
@@ -40,13 +40,8 @@ file server and edit clojurescript realtime
 
 ...
 
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+<!-- ### Bugs -->
+ 
 
 ## License
 

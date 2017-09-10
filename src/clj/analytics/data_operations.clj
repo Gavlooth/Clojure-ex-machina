@@ -11,7 +11,6 @@
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [org.apache.commons.lang3 StringUtils]))
 
-;;; Spec conformers for data coercion TODO Add validation endswith ".0"
 
 (def ->?double
   (s/conformer  (fn [x]
@@ -22,6 +21,7 @@
                                    (catch Exception _
                                      :clojure.spec.alpha/invalid))
                     :else :clojure.spec.alpha/invalid))))
+
 
 (def ->?integer
   (s/conformer
@@ -76,6 +76,7 @@
 (def data (csv->data raw-csv))
 
 ;; Change "?" to -1 for data exploation. TODO merge with clojure.spec and generalize 
+;;FIXME For  contiouus data use  median
 (def csv-fixed
   (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
 
@@ -95,7 +96,7 @@
 (s/def ::hormonal-contraceptives  ->?integer)
 (s/def ::hormonal-contraceptives-<years>  ->?double)
 (s/def ::iud  ->?integer)
-(s/def ::iud-<years>  ->?integer)
+(s/def ::iud-<years>  ->?double) ;corected
 (s/def ::st-ds  ->?integer)
 (s/def ::st-ds-<number>  ->?integer)
 (s/def ::st-ds:condylomatosis ->?integer)
@@ -156,6 +157,12 @@
  "Use clojure.spec to coerse" 
   (map #(s/conform ::data %) data))
 
+;; Before coercing the data, use this to validate it
+(defn check-data [data] 
+  (map #(s/explain ::data %) data)) 
+
+(check-data data-fixed)
+
   (defn stat-NA [dt]
   (into {}
         (for [a-key (-> data first keys)
@@ -172,19 +179,51 @@
 (def data-coerced
   (coerce-csv data-fixed))
 
+
+;; The deferent cervical cancer classes
 (def cervical-cancer-classes
-  (map #(select-keys
-          [:hinselmann :schiller
-           :citology :biopsy] %)
-       data-coerced  ) )
+ (for [datum  data-coerced ]
+  (select-keys datum
+               [:hinselmann :schiller
+                       :citology :biopsy]))) 
+
+;lets tacke a pick of value frequencies in files
+(zipmap [:hinselmann :schiller :citology :biopsy] (map frequencies (map  #(map (fn [x] (get x %) ) cervical-cancer-classes)   [:hinselmann :schiller :citology :biopsy]))) ;;frequencies in classes
+
+;now we can compine the categorial variables 
+
+
+(defn calculate-overall-proporsions [data] 
+ (let [overall  (reduce
+                  #(+ % (reduce
+                          (fn [x [k v]]
+                            (+ x v)) 0 %2))
+                  0 data)
+       
+       the-keys (keys (first data))]  
+(zipmap the-keys 
+   (map  #(/ (reduce (fn [acc  el]
+                  (+ acc  (get  el %))) 0 data) overall) the-keys))))
+
+
+(calculate-overall-proporsions cervical-cancer-classes)
+
+
+
 
 (def freq (for [a-key labels]
             {a-key  (frequencies (map a-key data-coerced))}))
 
+;; (calculate-overall-proporsions  data-coerced )
 (def correlations
-  (transduce identity (correlation-matrix  (zipmap labels labels))  data-coerced))
+  (transduce
+    identity
+      (correlation-matrix 
+       (zipmap labels labels)) 
+      data-coerced))
 
 
+;(reduce (fn [x [k v] ] (+ x v)) 0 (first data-coerced))
 ;; To
 (def indexies
   (map (fn [[[x y] z]]
