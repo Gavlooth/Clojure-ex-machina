@@ -14,4 +14,15 @@ pom.xml.asc
 /node_modules
 /resources/public/js/compiled
 node_modules
+/*.log
+/target
+/*-init.clj
+out
+.cljs_rhino_repl
+.lein-deps-sum
+.lein-repl-history
+.lein-plugins/
+.repl
+.nrepl-port
+*jar
 

@@ -7,17 +7,20 @@
 
 (enable-console-print!)
 
-
+;;The element tha holds the data tag
 (def data-NA-element (dm/parent (dm/sel1 :#bar-chart-NA)))
 
-
+;; Transit reader
 (defn parse-data-tag [el data-tag]
+  "Parse the data from a transit atribute value"
   (let [rdr (t/reader :json)]
     (t/read rdr (dm/attr el data-tag))))
 
 (def data-NA (parse-data-tag data-NA-element "data-bar-chart-NA"))
 
+;; TODO generalize plotly.js wrappers for reusability
 (defn plot-NAs [el labels NAs NAs-%]
+  "Display the NAs values in a plotly.js bargraph" 
   (let [bar-data [{:x labels
                    :y  NAs
                    :type "bar"
@@ -39,6 +42,7 @@
 
 (def NAs-% (map  #(str (.substr (str  (:N/A-% %)) 0 5) "%")  
                 (vals data-NA)))
+
 (plot-NAs (dm/sel1 :#bar-chart-NA) data-NA-labels NAs NAs-%)
 
 (def correlation-data-element (dm/parent (dm/sel1 :#correlation-heatmap)))
@@ -48,8 +52,8 @@
 
 (def data-correlation-labels  (parse-data-tag correlation-data-element
                              "data-heatmap-correlation-labels" ))
-
-(def uper-triangular 
+;; For better visualability remove the uper triangel from the matrix 
+(def lower-triangular 
   (clog (vec (map-indexed
      (fn  [i x]
                  (vec  (map-indexed
@@ -63,11 +67,11 @@
 (def correlation-data-labels (clj->js data-correlation-labels))
 (.log js/console correlation-data-labels)
 
-
+;; FIXME remove the function call and generalize with a wrapper
 (.plot  js/Plotly correlation-data-element
        (clj->js  [{:colorscale [[0 "#B22222"]
                                 [1 "#20B2AA"]] 
-                   :z (reverse uper-triangular)
+                   :z (reverse lower-triangular)
                    :x  correlation-data-labels 
                    :y (reverse  correlation-data-labels)     
                    :xgap 2

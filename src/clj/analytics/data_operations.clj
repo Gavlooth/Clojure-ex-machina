@@ -11,6 +11,8 @@
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            [org.apache.commons.lang3 StringUtils]))
 
+;;; Spec conformers for data coercion TODO Add validation endswith ".0"
+
 (def ->?double
   (s/conformer  (fn [x]
                   (cond
@@ -32,14 +34,18 @@
                         :clojure.spec.alpha/invalid))
        :else :clojure.spec.alpha/invalid))))
 
+;; Storage for the transit data
 (defonce data-store (atom {:data-NA nil :corr-data nil}))
 
+
 (defn map->transit-json [a-map]
+ "Convert a transit string from a map"
   (let [out  (ByteArrayOutputStream. 4096)
         writer  (tr/writer out :json)]
     (tr/write writer a-map)
     (str out)))
 
+;; Load the resources. TODO move data from resources to data/ folder
 (def resources
   (let [dirs    (.listFiles (io/file "resources/data/"))]
     (into {}   (map #(vector
@@ -52,26 +58,33 @@
 (def raw-csv (-> ccrc first io/reader read-csv))
 
 (defn- restructure-keyword [st]
+ "Convert strings to valid clojure keywords"
   (as-> st  $  (StringUtils/replace $ "(" "<")
-        (StringUtils/replace $ ")" ">")  (StringUtils/replace $ "/" "-per-") (->kebab-case $)))
+        (StringUtils/replace $ ")" ">") ;replace () with <>
+        (StringUtils/replace $ "/" "-per-") ; replace / with -per-
+        (->kebab-case $)))
 
-(def the-keys (map (comp keyword  ->kebab-case restructure-keyword)   (first raw-csv)))
+(def the-keys (map (comp keyword  ->kebab-case restructure-keyword) 
+                   (first raw-csv)))
 
 (defn csv->data [[head & tail]  & {:keys [ns]}]
+  "csv data to clojure vector of maps (dataframe)"
   (let  [labels (mapv #(if ns (keyword  ns (restructure-keyword %))
                            (keyword  (restructure-keyword %))) head)]
     (mapv  zipmap (repeat labels) tail)))
 
 (def data (csv->data raw-csv))
 
+;; Change "?" to -1 for data exploation. TODO merge with clojure.spec and generalize 
 (def csv-fixed
   (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
 
-(def labels  (vec  (keys (first data))))
+(def labels  (vec  (keys (first data)))) ;TODO Create function
 
 (def pure-labels (first raw-csv))
-(def data-fixed  (csv->data  csv-fixed))
 
+(def data-fixed  (csv->data  csv-fixed))
+;;; Data specs
 (s/def ::age  ->?integer)
 (s/def ::number-of-sexual-partners ->?integer)
 (s/def ::first-sexual-intercourse ->?integer)
@@ -136,10 +149,12 @@
            ::hinselmann ::schiller ::citology
            ::biopsy]))
 
+;;;Data exploration section
+
+;; Data Coercion TODO Check data for :clojure.spec.alpha/invalid  values
 (defn coerce-csv [data]
+ "Use clojure.spec to coerse" 
   (map #(s/conform ::data %) data))
-
-
 
   (defn stat-NA [dt]
   (into {}
@@ -157,19 +172,29 @@
 (def data-coerced
   (coerce-csv data-fixed))
 
+(def cervical-cancer-classes
+  (map #(select-keys
+          [:hinselmann :schiller
+           :citology :biopsy] %)
+       data-coerced  ) )
+
 (def freq (for [a-key labels]
             {a-key  (frequencies (map a-key data-coerced))}))
 
 (def correlations
   (transduce identity (correlation-matrix  (zipmap labels labels))  data-coerced))
 
+
+;; To
 (def indexies
   (map (fn [[[x y] z]]
          [(.indexOf labels x) ]) correlations ))
 
 
 (defn map-indexies [labels correlations]
- (let [get-index #(.indexOf labels %)]
+ "Create a matrix (vector of vectors) with position indexies
+ instead of keys."
+  (let [get-index #(.indexOf labels %)]
   (->> correlations
    (map (fn [[[x y] z]]
          [[(get-index x)
@@ -178,14 +203,14 @@
    (sort-by  (comp  second first))
    (sort-by ffirst))))
 
-
+;;Build a regular indexed matrix to handle the data visualization with plotly.js 
 (def corplot-matrix
 (->> correlations
    (map-indexies labels)
    (map  (fn [[[x y] z ]] z))
    (partition 36) ) )
 
-
+;;Updates the data storage atom with appropriate transits
 (defn update-data []
   (swap! data-store
          assoc :data-NA

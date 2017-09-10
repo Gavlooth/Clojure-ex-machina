@@ -2416,3 +2416,30 @@ notifying browser that file changed:  resources\public\js\compiled\out\analytics
 [0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
 [32mSuccessfully compiled "resources/public/js/analytics.js" in 0.532 seconds.[0m
 notifying browser that file changed:  resources\public\js\compiled\out\analytics\app.js
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.891 seconds.[0m
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.518 seconds.[0m
+notifying browser that file changed:  resources/public/js/compiled/out/goog/deps.js
+notifying browser that file changed:  resources/public/js/compiled/out/cljs_deps.js
+notifying browser that file changed:  resources\public\js\compiled\out\analytics\app.js
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.628 seconds.[0m
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.474 seconds.[0m
+notifying browser that file changed:  resources\public\js\compiled\out\analytics\app.js
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.356 seconds.[0m
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.584 seconds.[0m
+notifying browser that file changed:  resources\public\js\compiled\out\analytics\app.js
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.349 seconds.[0m
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.522 seconds.[0m
+notifying browser that file changed:  resources\public\js\compiled\out\analytics\app.js
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.595 seconds.[0m
+[0mCompiling "resources/public/js/analytics.js" from ["src/cljs" "src/cljc"]...[0m
+[32mSuccessfully compiled "resources/public/js/analytics.js" in 0.466 seconds.[0m
+notifying browser that file changed:  resources\public\js\compiled\out\analytics\app.js

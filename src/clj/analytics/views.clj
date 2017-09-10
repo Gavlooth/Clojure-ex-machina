@@ -19,7 +19,9 @@
 
 (defn home  [& {:keys [data-NA
                        correlation-data-labels
-                       correlation-data-matrix]}]
+                       correlation-data-matrix
+                       cancer-classes
+                       ]}]
   (html5
    {:lang "en"}
    (head)
@@ -31,7 +33,11 @@
      [:div.row {:style {:height "800"}
                 :data-heatmap-correlation-matrix correlation-data-matrix 
                 :data-heatmap-correlation-labels correlation-data-labels}
-      [:div#correlation-heatmap]]]
+      [:div#correlation-heatmap]]
+     
+     [:div.row {:style {:height "800"} :data-bar-chart-cancer-classes
+                                      cancer-classes }
+            [:div#bar-chart-cancer-classes ]] ]
     [:script  {:type "application/javascript"
                :src  (to-uri "/plotly-latest.min.js")}]
     [:script  {:type "application/javascript"

@@ -1,28 +1,42 @@
 # analytics
 
-FIXME: A First attempt of data exploration in clojure  
+An early attempt of data exploration in clojure.
+This repository is ment to evolve in a proof of concept of
+how data exploitation can be done using clojure.
+and clojurescript Clojure.
+For now only plots the distribution of NAs as well as the Correlation between variables
+of the cervical canser risk classification data-set from kaggle
 
+The followint tools where used:
+### Clojure:
+* Mastodon c kixi.stats for the data exploration
+* Clojure.spec for data validation/coercion
+* clojure.data for csv manipulation
+* kamel-case-kebab for proper csv variable name handling
+* Apache commons StringUtils for efficient string manipulation
+
+### ClojureScript:
+* Dommy.js for dom element manipulation
+* Plotly.js For visualization of the data
 ## Installation
 
-Download and install the leiningen 
+Download and install leiningen then clonre this repository
 ## Usage
 
-run lein cljsbuild to build the clojurescript files
+Run lein cljsbuild to build the clojurescript files
 Start a repl with lein repl
 run (start-server) to start a jetty server on localhost:12345
-optionaly run (fg/start-figwheel!) to start the figwheel 
-file server and edit clojurescript realtime 
+optionaly run (fg/start-figwheel!) to start the figwheel
+file server and edit clojurescript realtime
 
 
-FIXME: explanation
+<!-- FIXME: explanation -->
 
-    $ java -jar analytics-0.1.0-standalone.jar [args]
+<!-- ## Options -->
 
-## Options
+<!-- FIXME: listing of options this app accepts. -->
 
-FIXME: listing of options this app accepts.
-
-## Examples
+<!-- ## Examples -->
 
 ...
 
@@ -36,7 +50,6 @@ FIXME: listing of options this app accepts.
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright© 2017
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the MIT Lisence

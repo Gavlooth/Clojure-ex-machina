@@ -1,0 +1,4 @@
+*.css linguist-language=Clojure
+*.html linguist-language=Clojure
+*.js  linguist-language=Clojure
+*.cljs linguist-language=Clojure
