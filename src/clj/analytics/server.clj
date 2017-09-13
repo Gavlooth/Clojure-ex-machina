@@ -15,12 +15,17 @@
 
 (defn home-routes []
   (update-data)
-  (let [{:keys [data-NA correlation-data-matrix
-               correlation-data-labels]} @data-store]
+  (let [{:keys [data-NA
+                correlation-data-matrix
+                combined-cancer-data
+                correlation-data-labels
+                age-significance-data]} @data-store]
   (routes
    (GET "/" _ (views/home
                 :data-NA data-NA
+                :age-significance-data age-significance-data
                 :correlation-data-matrix correlation-data-matrix
+                :combined-cancer-data combined-cancer-data
                 :correlation-data-labels correlation-data-labels)))))
 
 

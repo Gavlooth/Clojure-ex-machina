@@ -13,7 +13,8 @@
 
 
 (def ->?double
-  (s/conformer  (fn [x]
+  (s/conformer 
+    (fn [x]
                   (cond
                     (integer? x) x
                     (string? x)  (try
@@ -64,7 +65,10 @@
         (StringUtils/replace $ "/" "-per-") ; replace / with -per-
         (->kebab-case $)))
 
-(def the-keys (map (comp keyword  ->kebab-case restructure-keyword) 
+(def the-keys
+  (map
+    (comp keyword 
+             ->kebab-case restructure-keyword) 
                    (first raw-csv)))
 
 (defn csv->data [[head & tail]  & {:keys [ns]}]
@@ -82,9 +86,13 @@
 
 (def labels  (vec  (keys (first data)))) ;TODO Create function
 
+(defn extract-labels [data & {:keys [pure]} ]
+  (vec  (keys (first  (if pure (csv->data data) data )))))
+
 (def pure-labels (first raw-csv))
 
 (def data-fixed  (csv->data  csv-fixed))
+
 ;;; Data specs
 (s/def ::age  ->?integer)
 (s/def ::number-of-sexual-partners ->?integer)
@@ -187,12 +195,24 @@
                [:hinselmann :schiller
                        :citology :biopsy]))) 
 
-;lets tacke a pick of value frequencies in files
-(zipmap [:hinselmann :schiller :citology :biopsy] (map frequencies (map  #(map (fn [x] (get x %) ) cervical-cancer-classes)   [:hinselmann :schiller :citology :biopsy]))) ;;frequencies in classes
+;lets take a pick of value frequencies in files
+(zipmap [:hinselmann :schiller :citology :biopsy]
+        (map frequencies (map  #(map (fn [x] (get x %))
+                                     cervical-cancer-classes)   [:hinselmann :schiller :citology :biopsy]))) ;;frequencies in classes
 
-;now we can compine the categorial variables 
+;now we can compine the binary  categorial variables  in one variable 
+;; since the variables are binary we can just sum them app
+(defn reduce-cancer-variables [data]
+ (let  [c-merger
+ (fn  [ {:keys  [hinselmann schiller citology biopsy] :as all}] 
+  (let [the-sum  (+  hinselmann schiller citology biopsy)
+        acc   (dissoc  all :hinselmann :schiller :citology :biopsy)] 
+    (assoc acc :cervical-cancer the-sum)))]  
+  (map  c-merger data)))
 
 
+
+;;function to calculate overal percentage of values in data
 (defn calculate-overall-proporsions [data] 
  (let [overall  (reduce
                   #(+ % (reduce
@@ -206,21 +226,17 @@
                   (+ acc  (get  el %))) 0 data) overall) the-keys))))
 
 
-(calculate-overall-proporsions cervical-cancer-classes)
-
-
-
-
-(def freq (for [a-key labels]
-            {a-key  (frequencies (map a-key data-coerced))}))
+;; (def freq (for [a-key labels]
+;;             {a-key  (frequencies (map a-key data-coerced))}))
 
 ;; (calculate-overall-proporsions  data-coerced )
+
 (def correlations
   (transduce
     identity
       (correlation-matrix 
        (zipmap labels labels)) 
-      data-coerced))
+     data-coerced))
 
 
 ;(reduce (fn [x [k v] ] (+ x v)) 0 (first data-coerced))
@@ -229,6 +245,16 @@
   (map (fn [[[x y] z]]
          [(.indexOf labels x) ]) correlations ))
 
+(defn get-indexies [correlations]
+ (map (fn [[[x y] z]]
+         [(.indexOf labels x)]) correlations))
+
+(defn calculate-correlations [labels the-data]
+ (transduce
+    identity
+      (correlation-matrix 
+       (zipmap labels labels)) 
+     the-data))
 
 (defn map-indexies [labels correlations]
  "Create a matrix (vector of vectors) with position indexies
@@ -244,10 +270,23 @@
 
 ;;Build a regular indexed matrix to handle the data visualization with plotly.js 
 (def corplot-matrix
-(->> correlations
+ (->> correlations
    (map-indexies labels)
    (map  (fn [[[x y] z ]] z))
    (partition 36) ) )
+
+
+(defn build-corplot-matrix [correlations labels]
+(->> correlations
+   (map-indexies labels)
+   (map  (fn [[[x y] z ]] z))
+   (partition 36))) 
+
+(def reduce-data (reduce-cancer-variables data-coerced) )
+
+(def reduced-correlations
+  (calculate-correlations
+    (extract-labels reduce-data) reduce-data))
 
 ;;Updates the data storage atom with appropriate transits
 (defn update-data []
@@ -259,9 +298,18 @@
          assoc :correlation-data-matrix
          (map->transit-json corplot-matrix))
 
-(swap! data-store
+ (swap! data-store
          assoc :correlation-data-labels
-         (map->transit-json pure-labels)))
-
+         (map->transit-json pure-labels))
+ 
+(swap! data-store
+         assoc :age-significance-data
+         (map->transit-json
+           (map
+             #(select-keys % [:age :servical-cancer])
+             (reduce-cancer-variables data-coerced))))
+(swap! data-store
+         assoc :combined-cancer-data (map->transit-json
+           (build-corplot-matrix reduced-correlations (extract-labels reduce-data)))) ) 
 
 

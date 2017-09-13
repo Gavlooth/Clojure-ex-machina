@@ -84,3 +84,32 @@
                          :l 230 }
                 :xaxis {:side "top"
                         :tickangle -40}}))
+
+
+(defn corrplot [correlation-data-element
+               correlation-data-labels
+                lower-triangular] 
+
+(.plot  js/Plotly correlation-data-element
+       (clj->js  [{:colorscale [[0 "#B22222"]
+                                [1 "#20B2AA"]] 
+                   :z (reverse lower-triangular)
+                   :x  correlation-data-labels 
+                   :y (reverse  correlation-data-labels)     
+                   :xgap 2
+                   :ygap 2
+                   :type "heatmap"}])
+     (clj->js  { :title "Correlations bettween variables"
+                :width 1000
+                :height 1000
+                :margin {:t 300
+                         :l 230 }
+                :xaxis {:side "top"
+                        :tickangle -40}})))
+
+
+(def cor-1 (dm/parent (dm/sel1 :#chart-combined-cancer)))
+
+(def cor-1-matrix
+  (parse-data-tag cor-1 "data-combined-cancer"))
+
