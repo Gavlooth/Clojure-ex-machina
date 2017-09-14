@@ -290,6 +290,7 @@
 
 ;;Updates the data storage atom with appropriate transits
 ;;TODO Get rid of the state. Add stuart sierras' component
+;; TODO Function to autogenerate data-* components
 (defn update-data []
   (swap! data-store
          assoc :data-NA

@@ -23,7 +23,7 @@ The following tools where used:
 Download and install leiningen then clone this repository
 ## Usage
 
-1. From the root of the cloned project run lein cljsbuild to build the clojurescript files 
+1. From the root of the cloned project run lein cljsbuild to build the clojurescript files
 2. Start a repl with lein repl
 3. Run (start-server) to start a jetty server on localhost:12345
 4. optionaly run (fg/start-figwheel!) to start the figwheel
@@ -41,10 +41,10 @@ Download and install leiningen then clone this repository
 ...
 
 <!-- ### Bugs -->
- 
+
 
 ## License
 
-Copyright© 2017
+Copyright© 2017 Christos Chatzifountas
 
 Distributed under the MIT Lisence

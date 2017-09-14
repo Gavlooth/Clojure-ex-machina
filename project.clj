@@ -19,6 +19,7 @@
                  [com.cognitect/transit-clj "0.8.300"]
                  [org.apache.commons/commons-lang3 "3.6"]
                  [com.cognitect/transit-cljs "0.8.239"]
+                 [com.stuartsierra/component "0.3.2"]
                  [kixi/stats "0.3.9"]]
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-environ "1.1.0"]]
