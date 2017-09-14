@@ -13,7 +13,7 @@
 
 
 (def ->?double
-  (s/conformer 
+  (s/conformer
     (fn [x]
                   (cond
                     (integer? x) x
@@ -67,8 +67,8 @@
 
 (def the-keys
   (map
-    (comp keyword 
-             ->kebab-case restructure-keyword) 
+    (comp keyword
+             ->kebab-case restructure-keyword)
                    (first raw-csv)))
 
 (defn csv->data [[head & tail]  & {:keys [ns]}]
@@ -79,7 +79,7 @@
 
 (def data (csv->data raw-csv))
 
-;; Change "?" to -1 for data exploation. TODO merge with clojure.spec and generalize 
+;; Change "?" to -1 for data exploation. TODO merge with clojure.spec and generalize
 ;;FIXME For  contiouus data use  median
 (def csv-fixed
   (map #(map  (fn [x] (if  (= x "?") -1 x))  %)  raw-csv))
@@ -162,12 +162,12 @@
 
 ;; Data Coercion TODO Check data for :clojure.spec.alpha/invalid  values
 (defn coerce-csv [data]
- "Use clojure.spec to coerse" 
+ "Use clojure.spec to coerse"
   (map #(s/conform ::data %) data))
 
 ;; Before coercing the data, use this to validate it
-(defn check-data [data] 
-  (map #(s/explain ::data %) data)) 
+(defn check-data [data]
+  (map #(s/explain ::data %) data))
 
 (check-data data-fixed)
 
@@ -193,35 +193,35 @@
  (for [datum  data-coerced ]
   (select-keys datum
                [:hinselmann :schiller
-                       :citology :biopsy]))) 
+                       :citology :biopsy])))
 
 ;lets take a pick of value frequencies in files
 (zipmap [:hinselmann :schiller :citology :biopsy]
         (map frequencies (map  #(map (fn [x] (get x %))
                                      cervical-cancer-classes)   [:hinselmann :schiller :citology :biopsy]))) ;;frequencies in classes
 
-;now we can compine the binary  categorial variables  in one variable 
+;now we can compine the binary  categorial variables  in one variable
 ;; since the variables are binary we can just sum them app
 (defn reduce-cancer-variables [data]
  (let  [c-merger
- (fn  [ {:keys  [hinselmann schiller citology biopsy] :as all}] 
+ (fn  [ {:keys  [hinselmann schiller citology biopsy] :as all}]
   (let [the-sum  (+  hinselmann schiller citology biopsy)
-        acc   (dissoc  all :hinselmann :schiller :citology :biopsy)] 
-    (assoc acc :cervical-cancer the-sum)))]  
+        acc   (dissoc  all :hinselmann :schiller :citology :biopsy)]
+    (assoc acc :cervical-cancer the-sum)))]
   (map  c-merger data)))
 
 
 
 ;;function to calculate overal percentage of values in data
-(defn calculate-overall-proporsions [data] 
+(defn calculate-overall-proporsions [data]
  (let [overall  (reduce
                   #(+ % (reduce
                           (fn [x [k v]]
                             (+ x v)) 0 %2))
                   0 data)
-       
-       the-keys (keys (first data))]  
-(zipmap the-keys 
+
+       the-keys (keys (first data))]
+(zipmap the-keys
    (map  #(/ (reduce (fn [acc  el]
                   (+ acc  (get  el %))) 0 data) overall) the-keys))))
 
@@ -234,8 +234,8 @@
 (def correlations
   (transduce
     identity
-      (correlation-matrix 
-       (zipmap labels labels)) 
+      (correlation-matrix
+       (zipmap labels labels))
      data-coerced))
 
 
@@ -252,8 +252,8 @@
 (defn calculate-correlations [labels the-data]
  (transduce
     identity
-      (correlation-matrix 
-       (zipmap labels labels)) 
+      (correlation-matrix
+       (zipmap labels labels))
      the-data))
 
 (defn map-indexies [labels correlations]
@@ -268,7 +268,7 @@
    (sort-by  (comp  second first))
    (sort-by ffirst))))
 
-;;Build a regular indexed matrix to handle the data visualization with plotly.js 
+;;Build a regular indexed matrix to handle the data visualization with plotly.js
 (def corplot-matrix
  (->> correlations
    (map-indexies labels)
@@ -280,7 +280,7 @@
 (->> correlations
    (map-indexies labels)
    (map  (fn [[[x y] z ]] z))
-   (partition 36))) 
+   (partition 36)))
 
 (def reduce-data (reduce-cancer-variables data-coerced) )
 
@@ -289,6 +289,7 @@
     (extract-labels reduce-data) reduce-data))
 
 ;;Updates the data storage atom with appropriate transits
+;;TODO Get rid of the state. Add stuart sierras' component
 (defn update-data []
   (swap! data-store
          assoc :data-NA
@@ -301,7 +302,7 @@
  (swap! data-store
          assoc :correlation-data-labels
          (map->transit-json pure-labels))
- 
+
 (swap! data-store
          assoc :age-significance-data
          (map->transit-json
@@ -310,6 +311,6 @@
              (reduce-cancer-variables data-coerced))))
 (swap! data-store
          assoc :combined-cancer-data (map->transit-json
-           (build-corplot-matrix reduced-correlations (extract-labels reduce-data)))) ) 
+           (build-corplot-matrix reduced-correlations (extract-labels reduce-data)))) )
 
 
