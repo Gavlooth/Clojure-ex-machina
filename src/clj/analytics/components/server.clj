@@ -2,19 +2,23 @@
   (:require [com.stuartsierra.component :as component]
             [ring.adapter.jetty :as jetty]))
 
+;; this will be implemented in the dev folder
+#_(defrecord Figwheel []
+    component/Lifecycle
+    (start []
+      (ra/start-figwheel!))
+    (stop []
+      (ra/stop-figwheel!)))
 
 
 
-
-(defrecord Server [app-config app-handler]
+(defrecord Server [app-handler]
   component/Lifecycle
   (start [component]
     (if (:server component)
       component
-      (let [options (get-in app-config [:options :server])
-            options (assoc options :join? false)
-            handler (:handler app-handler)
-            server (jetty/run-jetty handler options)]
+      (let [handler (:handler app-handler)
+            server (jetty/run-jetty handler {:port 12345 :join? false})]
         (assoc component :server server))))
   (stop [component]
     (if-let [server (:server component)]

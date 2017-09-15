@@ -22,8 +22,7 @@
                        correlation-data-matrix
                        cancer-classes
                        age-significance-data
-                       combined-cancer-data 
-                       ]}]
+                       combined-cancer-data]}]
   (html5
    {:lang "en"}
    (head)
@@ -33,21 +32,21 @@
      [:div.row {:style {:height "800"} :data-bar-chart-NA data-NA}
       [:div#bar-chart-NA]]
      [:div.row {:style {:height "800"}
-                :data-heatmap-correlation-matrix correlation-data-matrix 
+                :data-heatmap-correlation-matrix correlation-data-matrix
                 :data-heatmap-correlation-labels correlation-data-labels}
       [:div#correlation-heatmap]]
      [:div.row {:style {:height "800"}
                 :data-chart-age-significance
-                                      cancer-classes}
-            [:div#chart-age-significance]]
-[:div.row {:style {:height "800"}
-           :data-combined-cancer
-            combined-cancer-data}
-            [:div#chart-combined-cancer]]
+                cancer-classes}
+      [:div#chart-age-significance]]
+     [:div.row {:style {:height "800"}
+                :data-combined-cancer
+                combined-cancer-data}
+      [:div#chart-combined-cancer]]
      [:div.row {:style {:height "800"}
                 :data-bar-chart-cancer-classes
-                                      cancer-classes }
-            [:div#bar-chart-cancer-classes ]] ]
+                cancer-classes}
+      [:div#bar-chart-cancer-classes]]]
     [:script  {:type "application/javascript"
                :src  (to-uri "/plotly-latest.min.js")}]
     [:script  {:type "application/javascript"

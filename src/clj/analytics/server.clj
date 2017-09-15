@@ -20,20 +20,20 @@
                 combined-cancer-data
                 correlation-data-labels
                 age-significance-data]} @data-store]
-  (routes
-   (GET "/" _ (views/home
-                :data-NA data-NA
-                :age-significance-data age-significance-data
-                :correlation-data-matrix correlation-data-matrix
-                :combined-cancer-data combined-cancer-data
-                :correlation-data-labels correlation-data-labels)))))
+    (routes
+     (GET "/" _ (views/home
+                 :data-NA data-NA
+                 :age-significance-data age-significance-data
+                 :correlation-data-matrix correlation-data-matrix
+                 :combined-cancer-data combined-cancer-data
+                 :correlation-data-labels correlation-data-labels)))))
 
 
 
 (defn  handler []
   (jetty/run-jetty
    (wrap-reload (wrap-defaults
-                   (#'home-routes)  site-defaults))
+                 (#'home-routes)  site-defaults))
    {:port 12345 :join? false}))
 
-(defn -main [] (handler) )
+(defn -main [] (handler))

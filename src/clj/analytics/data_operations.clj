@@ -14,14 +14,14 @@
 
 (def ->?double
   (s/conformer
-    (fn [x]
-                  (cond
-                    (integer? x) x
-                    (string? x)  (try
-                                   (Double/parseDouble x)
-                                   (catch Exception _
-                                     :clojure.spec.alpha/invalid))
-                    :else :clojure.spec.alpha/invalid))))
+   (fn [x]
+     (cond
+       (integer? x) x
+       (string? x)  (try
+                      (Double/parseDouble x)
+                      (catch Exception _
+                        :clojure.spec.alpha/invalid))
+       :else :clojure.spec.alpha/invalid))))
 
 
 (def ->?integer
@@ -40,7 +40,7 @@
 
 
 (defn map->transit-json [a-map]
- "Convert a transit string from a map"
+  "Convert a transit string from a map"
   (let [out  (ByteArrayOutputStream. 4096)
         writer  (tr/writer out :json)]
     (tr/write writer a-map)
@@ -59,7 +59,7 @@
 (def raw-csv (-> ccrc first io/reader read-csv))
 
 (defn- restructure-keyword [st]
- "Convert strings to valid clojure keywords"
+  "Convert strings to valid clojure keywords"
   (as-> st  $  (StringUtils/replace $ "(" "<")
         (StringUtils/replace $ ")" ">") ;replace () with <>
         (StringUtils/replace $ "/" "-per-") ; replace / with -per-
@@ -67,9 +67,9 @@
 
 (def the-keys
   (map
-    (comp keyword
-             ->kebab-case restructure-keyword)
-                   (first raw-csv)))
+   (comp keyword
+         ->kebab-case restructure-keyword)
+   (first raw-csv)))
 
 (defn csv->data [[head & tail]  & {:keys [ns]}]
   "csv data to clojure vector of maps (dataframe)"
@@ -86,8 +86,8 @@
 
 (def labels  (vec  (keys (first data)))) ;TODO Create function
 
-(defn extract-labels [data & {:keys [pure]} ]
-  (vec  (keys (first  (if pure (csv->data data) data )))))
+(defn extract-labels [data & {:keys [pure]}]
+  (vec  (keys (first  (if pure (csv->data data) data)))))
 
 (def pure-labels (first raw-csv))
 
@@ -162,7 +162,7 @@
 
 ;; Data Coercion TODO Check data for :clojure.spec.alpha/invalid  values
 (defn coerce-csv [data]
- "Use clojure.spec to coerse"
+  "Use clojure.spec to coerse"
   (map #(s/conform ::data %) data))
 
 ;; Before coercing the data, use this to validate it
@@ -171,7 +171,7 @@
 
 (check-data data-fixed)
 
-  (defn stat-NA [dt]
+(defn stat-NA [dt]
   (into {}
         (for [a-key (-> data first keys)
               :let [entries (map #(get % a-key) data)
@@ -190,10 +190,10 @@
 
 ;; The deferent cervical cancer classes
 (def cervical-cancer-classes
- (for [datum  data-coerced ]
-  (select-keys datum
-               [:hinselmann :schiller
-                       :citology :biopsy])))
+  (for [datum  data-coerced]
+    (select-keys datum
+                 [:hinselmann :schiller
+                  :citology :biopsy])))
 
 ;lets take a pick of value frequencies in files
 (zipmap [:hinselmann :schiller :citology :biopsy]
@@ -203,27 +203,27 @@
 ;now we can compine the binary  categorial variables  in one variable
 ;; since the variables are binary we can just sum them app
 (defn reduce-cancer-variables [data]
- (let  [c-merger
- (fn  [ {:keys  [hinselmann schiller citology biopsy] :as all}]
-  (let [the-sum  (+  hinselmann schiller citology biopsy)
-        acc   (dissoc  all :hinselmann :schiller :citology :biopsy)]
-    (assoc acc :cervical-cancer the-sum)))]
-  (map  c-merger data)))
+  (let  [c-merger
+         (fn  [{:keys  [hinselmann schiller citology biopsy] :as all}]
+           (let [the-sum  (+  hinselmann schiller citology biopsy)
+                 acc   (dissoc  all :hinselmann :schiller :citology :biopsy)]
+             (assoc acc :cervical-cancer the-sum)))]
+    (map  c-merger data)))
 
 
 
 ;;function to calculate overal percentage of values in data
 (defn calculate-overall-proporsions [data]
- (let [overall  (reduce
+  (let [overall  (reduce
                   #(+ % (reduce
-                          (fn [x [k v]]
-                            (+ x v)) 0 %2))
+                         (fn [x [k v]]
+                           (+ x v)) 0 %2))
                   0 data)
 
-       the-keys (keys (first data))]
-(zipmap the-keys
-   (map  #(/ (reduce (fn [acc  el]
-                  (+ acc  (get  el %))) 0 data) overall) the-keys))))
+        the-keys (keys (first data))]
+    (zipmap the-keys
+            (map  #(/ (reduce (fn [acc  el]
+                                (+ acc  (get  el %))) 0 data) overall) the-keys))))
 
 
 ;; (def freq (for [a-key labels]
@@ -233,60 +233,60 @@
 
 (def correlations
   (transduce
-    identity
-      (correlation-matrix
-       (zipmap labels labels))
-     data-coerced))
+   identity
+   (correlation-matrix
+    (zipmap labels labels))
+   data-coerced))
 
 
 ;(reduce (fn [x [k v] ] (+ x v)) 0 (first data-coerced))
 ;; To
 (def indexies
   (map (fn [[[x y] z]]
-         [(.indexOf labels x) ]) correlations ))
+         [(.indexOf labels x)]) correlations))
 
 (defn get-indexies [correlations]
- (map (fn [[[x y] z]]
+  (map (fn [[[x y] z]]
          [(.indexOf labels x)]) correlations))
 
 (defn calculate-correlations [labels the-data]
- (transduce
-    identity
-      (correlation-matrix
-       (zipmap labels labels))
-     the-data))
+  (transduce
+   identity
+   (correlation-matrix
+    (zipmap labels labels))
+   the-data))
 
 (defn map-indexies [labels correlations]
- "Create a matrix (vector of vectors) with position indexies
+  "Create a matrix (vector of vectors) with position indexies
  instead of keys."
   (let [get-index #(.indexOf labels %)]
-  (->> correlations
-   (map (fn [[[x y] z]]
-         [[(get-index x)
-           (get-index y) ]  z]))
-   (concat (mapv (fn [x] [ [x x] 1] ) (range 36)))
-   (sort-by  (comp  second first))
-   (sort-by ffirst))))
+    (->> correlations
+         (map (fn [[[x y] z]]
+                [[(get-index x)
+                  (get-index y)]  z]))
+         (concat (mapv (fn [x] [[x x] 1]) (range 36)))
+         (sort-by  (comp  second first))
+         (sort-by ffirst))))
 
 ;;Build a regular indexed matrix to handle the data visualization with plotly.js
 (def corplot-matrix
- (->> correlations
-   (map-indexies labels)
-   (map  (fn [[[x y] z ]] z))
-   (partition 36) ) )
+  (->> correlations
+       (map-indexies labels)
+       (map  (fn [[[x y] z]] z))
+       (partition 36)))
 
 
 (defn build-corplot-matrix [correlations labels]
-(->> correlations
-   (map-indexies labels)
-   (map  (fn [[[x y] z ]] z))
-   (partition 36)))
+  (->> correlations
+       (map-indexies labels)
+       (map  (fn [[[x y] z]] z))
+       (partition 36)))
 
-(def reduce-data (reduce-cancer-variables data-coerced) )
+(def reduced-data (reduce-cancer-variables data-coerced))
 
 (def reduced-correlations
   (calculate-correlations
-    (extract-labels reduce-data) reduce-data))
+   (extract-labels reduced-data) reduced-data))
 
 ;;Updates the data storage atom with appropriate transits
 ;;TODO Get rid of the state. Add stuart sierras' component
@@ -300,18 +300,18 @@
          assoc :correlation-data-matrix
          (map->transit-json corplot-matrix))
 
- (swap! data-store
+  (swap! data-store
          assoc :correlation-data-labels
          (map->transit-json pure-labels))
 
-(swap! data-store
+  (swap! data-store
          assoc :age-significance-data
          (map->transit-json
-           (map
-             #(select-keys % [:age :servical-cancer])
-             (reduce-cancer-variables data-coerced))))
-(swap! data-store
+          (map
+           #(select-keys % [:age :servical-cancer])
+           (reduce-cancer-variables data-coerced))))
+  (swap! data-store
          assoc :combined-cancer-data (map->transit-json
-           (build-corplot-matrix reduced-correlations (extract-labels reduce-data)))) )
+                                      (build-corplot-matrix reduced-correlations (extract-labels reduced-data)))))
 
 

@@ -19,6 +19,7 @@
                  [com.cognitect/transit-clj "0.8.300"]
                  [org.apache.commons/commons-lang3 "3.6"]
                  [com.cognitect/transit-cljs "0.8.239"]
+                 [com.stuartsierra/component.repl "0.2.0"]
                  [com.stuartsierra/component "0.3.2"]
                  [kixi/stats "0.3.9"]]
   :plugins [[lein-cljsbuild "1.1.6"]
@@ -33,8 +34,8 @@
 
   :uberjar-name "analytics.jar"
 
-  ;; Use `lein run` if you just want to start a HTTP server, without figwheel
-  :main analytics.server
+;;  :clean-targets ^{:protect false} [:target-path :compile-path "resources/public/cljs"]
+  :main analytics.core
 
   ;; nREPL by default starts in the :main namespace, we want to start in `user`
   ;; because that's where our development helper functions like (go) and

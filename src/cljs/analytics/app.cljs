@@ -1,6 +1,6 @@
 (ns analytics.app
   (:require [dommy.core :as dm]
-            [debux.cs.core :refer-macros [clog clogn break] ]
+            [debux.cs.core :refer-macros [clog clogn break]]
             [cognitect.transit :as t])
 
   (:import [goog.string]))
@@ -20,7 +20,7 @@
 
 ;; TODO generalize plotly.js wrappers for reusability
 (defn plot-NAs [el labels NAs NAs-%]
-  "Display the NAs values in a plotly.js bargraph" 
+  "Display the NAs values in a plotly.js bargraph"
   (let [bar-data [{:x labels
                    :y  NAs
                    :type "bar"
@@ -40,26 +40,25 @@
   (map #(clojure.string/replace (name %) "-" " ")  (keys data-NA)))
 (def NAs (map  :N/A   (vals data-NA)))
 
-(def NAs-% (map  #(str (.substr (str  (:N/A-% %)) 0 5) "%")  
-                (vals data-NA)))
+(def NAs-% (map  #(str (.substr (str  (:N/A-% %)) 0 5) "%")
+                 (vals data-NA)))
 
 (plot-NAs (dm/sel1 :#bar-chart-NA) data-NA-labels NAs NAs-%)
 
 (def correlation-data-element (dm/parent (dm/sel1 :#correlation-heatmap)))
 
 (def data-correlation-matrix  (parse-data-tag correlation-data-element
-                             "data-heatmap-correlation-matrix" ))
+                                              "data-heatmap-correlation-matrix"))
 
 (def data-correlation-labels  (parse-data-tag correlation-data-element
-                             "data-heatmap-correlation-labels" ))
-;; For better visualability remove the uper triangel from the matrix 
-(def lower-triangular 
+                                              "data-heatmap-correlation-labels"))
+;; For better visualability remove the uper triangel from the matrix
+(def lower-triangular
   (clog (vec (map-indexed
-     (fn  [i x]
-                 (vec  (map-indexed
-                    (fn [j y] (when-not (< i j) y)) x)))
-                data-correlation-matrix))))
-
+              (fn  [i x]
+                (vec  (map-indexed
+                       (fn [j y] (when-not (< i j) y)) x)))
+              data-correlation-matrix))))
 
 (def correlation-data-matrix
   (clj->js  data-correlation-matrix))
@@ -69,44 +68,49 @@
 
 ;; FIXME remove the function call and generalize with a wrapper
 (.plot  js/Plotly correlation-data-element
-       (clj->js  [{:colorscale [[0 "#B22222"]
-                                [1 "#20B2AA"]] 
-                   :z (reverse lower-triangular)
-                   :x  correlation-data-labels 
-                   :y (reverse  correlation-data-labels)     
-                   :xgap 2
-                   :ygap 2
-                   :type "heatmap"}])
-     (clj->js  { :title "Correlations bettween variables"
-                :width 1000
-                :height 1000
-                :margin {:t 300
-                         :l 230 }
-                :xaxis {:side "top"
-                        :tickangle -40}}))
-
+        (clj->js  [{:colorscale [[0 "#B22222"]
+                                 [1 "#20B2AA"]]
+                    :z (reverse lower-triangular)
+                    :x  correlation-data-labels
+                    :y (reverse  correlation-data-labels)
+                    :xgap 2
+                    :ygap 2
+                    :type "heatmap"}])
+        (clj->js  {:title "Correlations bettween variables"
+                   :width 1000
+                   :height 1000
+                   :margin {:t 300
+                            :l 230}
+                   :xaxis {:side "top"
+                           :tickangle -40}}))
 
 (defn corrplot [correlation-data-element
-               correlation-data-labels
-                lower-triangular] 
+                correlation-data-labels
+                lower-triangular]
 
-(.plot  js/Plotly correlation-data-element
-       (clj->js  [{:colorscale [[0 "#B22222"]
-                                [1 "#20B2AA"]] 
-                   :z (reverse lower-triangular)
-                   :x  correlation-data-labels 
-                   :y (reverse  correlation-data-labels)     
-                   :xgap 2
-                   :ygap 2
-                   :type "heatmap"}])
-     (clj->js  { :title "Correlations bettween variables"
-                :width 1000
-                :height 1000
-                :margin {:t 300
-                         :l 230 }
-                :xaxis {:side "top"
-                        :tickangle -40}})))
+  (.plot  js/Plotly correlation-data-element
+          (clj->js  [{:colorscale [[0 "#B22222"]
+                                   [1 "#20B2AA"]]
+                      :z (reverse lower-triangular)
+                      :x  correlation-data-labels
+                      :y (reverse  correlation-data-labels)
+                      :xgap 2
+                      :ygap 2
+                      :type "heatmap"}])
+          (clj->js  {:title "Correlations bettween variables"
+                     :width 1000
+                     :height 1000
+                     :margin {:t 300
+                              :l 230}
+                     :xaxis {:side "top"
+                             :tickangle -40}})))
 
+(defn matrix->lower-triangular  [the-matrix]
+  (vec (map-indexed
+        (fn  [i x]
+          (vec  (map-indexed
+                 (fn [j y] (when-not (< i j) y)) x)))
+        the-matrix)))
 
 (def cor-1 (dm/parent (dm/sel1 :#chart-combined-cancer)))
 

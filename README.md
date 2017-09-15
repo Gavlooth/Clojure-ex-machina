@@ -25,8 +25,9 @@ Download and install leiningen then clone this repository
 
 1. From the root of the cloned project run lein cljsbuild to build the clojurescript files
 2. Start a repl with lein repl
-3. Run (start-server) to start a jetty server on localhost:12345
-4. optionaly run (fg/start-figwheel!) to start the figwheel
+4. Development proccess now has integrated the excellent stuartsierra/component library So
+   Run (go) to start the jetty server on 12345, or (reset) to reload changes.
+5. optionaly run (fg/start-figwheel!) to start the figwheel
    file server and compile clojurescript realtime
 
 
