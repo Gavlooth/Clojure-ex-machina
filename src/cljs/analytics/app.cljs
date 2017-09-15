@@ -54,17 +54,16 @@
                                               "data-heatmap-correlation-labels"))
 ;; For better visualability remove the uper triangel from the matrix
 (def lower-triangular
-  (clog (vec (map-indexed
-              (fn  [i x]
-                (vec  (map-indexed
-                       (fn [j y] (when-not (< i j) y)) x)))
-              data-correlation-matrix))))
+  (vec (map-indexed
+        (fn  [i x]
+          (vec  (map-indexed
+                 (fn [j y] (when-not (< i j) y)) x)))
+        data-correlation-matrix)))
 
 (def correlation-data-matrix
   (clj->js  data-correlation-matrix))
 
 (def correlation-data-labels (clj->js data-correlation-labels))
-(.log js/console correlation-data-labels)
 
 ;; FIXME remove the function call and generalize with a wrapper
 (.plot  js/Plotly correlation-data-element
@@ -114,6 +113,6 @@
 
 (def cor-1 (dm/parent (dm/sel1 :#chart-combined-cancer)))
 
-(def cor-1-matrix
-  (parse-data-tag cor-1 "data-combined-cancer"))
+#_(def cor-1-matrix
+    (parse-data-tag cor-1 "data-combined-cancer"))
 

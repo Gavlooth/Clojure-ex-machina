@@ -1,4 +1,4 @@
-(ns user
+(ns dev
   (:require [figwheel-sidecar.repl-api :as fg]
             [com.stuartsierra.component.user-helpers :refer [dev go reset]]))
 
@@ -14,9 +14,4 @@
 
 (defn repl []
   (fg/cljs-repl))
-;;
-;; (defn start-server []
-;;   (swap! server assoc :jetty (#'handler)))
-;;
-;; (defn stop-server []
-;;   (-> server :jetty (.stop)))
+

@@ -288,30 +288,5 @@
   (calculate-correlations
    (extract-labels reduced-data) reduced-data))
 
-;;Updates the data storage atom with appropriate transits
-;;TODO Get rid of the state. Add stuart sierras' component
-;; TODO Function to autogenerate data-* components
-(defn update-data []
-  (swap! data-store
-         assoc :data-NA
-         (map->transit-json (stat-NA data)))
-
-  (swap! data-store
-         assoc :correlation-data-matrix
-         (map->transit-json corplot-matrix))
-
-  (swap! data-store
-         assoc :correlation-data-labels
-         (map->transit-json pure-labels))
-
-  (swap! data-store
-         assoc :age-significance-data
-         (map->transit-json
-          (map
-           #(select-keys % [:age :servical-cancer])
-           (reduce-cancer-variables data-coerced))))
-  (swap! data-store
-         assoc :combined-cancer-data (map->transit-json
-                                      (build-corplot-matrix reduced-correlations (extract-labels reduced-data)))))
 
 

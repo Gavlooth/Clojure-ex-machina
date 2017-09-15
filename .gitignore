@@ -13,6 +13,8 @@ pom.xml.asc
 /.clj**
 /node_modules
 /resources/public/js/compiled
+
+/resources/public/js/
 node_modules
 /*.log
 /target

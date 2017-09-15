@@ -3,7 +3,7 @@
             [ring.adapter.jetty :as jetty]
             [analytics.views :as views]
             [analytics.data-operations :refer
-             [data-store update-data map->transit-json]]
+             [data-store map->transit-json]]
             [spyscope.core]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.defaults :refer [wrap-defaults]]
@@ -35,7 +35,7 @@
                  :correlation-data-labels correlation-data-labels)))))
 
 (defn handler []
-  (wrap-reload (wrap-defaults (#'home-routes)  site-defaults)))
+  (wrap-defaults (#'home-routes)  site-defaults))
 
 (defrecord AppHandler [_]
   component/Lifecycle
