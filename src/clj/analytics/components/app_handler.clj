@@ -3,8 +3,7 @@
             [ring.adapter.jetty :as jetty]
             [analytics.views :as views]
             [analytics.data-operations :refer
-             [data-store map->transit-json]]
-            [spyscope.core]
+             [data-store map->transit-json]]            
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.defaults :refer [wrap-defaults]]
             [analytics.data-operations :refer
@@ -15,6 +14,8 @@
              [ANY GET PUT POST DELETE routes]]
             [ring.middleware.defaults :refer
              [api-defaults site-defaults wrap-defaults]]))
+
+
 ;;TODO integrate d-o/ as arguments to component
 (defn home-routes []
   (let  [data-NA (map->transit-json (stat-NA d-o/data))

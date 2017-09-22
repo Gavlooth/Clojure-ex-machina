@@ -1,7 +1,6 @@
  (ns analytics.views
    (:require  [hiccup.page :refer  [html5 include-css]]
-              [hiccup.util :refer [to-uri]]
-              [spyscope.core]))
+              [hiccup.util :refer [to-uri]]))
 
 (defn head []
   [:head
