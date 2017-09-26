@@ -21,7 +21,8 @@
                        correlation-data-matrix
                        cancer-classes
                        age-significance-data
-                       combined-cancer-data]}]
+                       combined-cancer-data-matrix
+                       combined-cancer-data-labels]}]
   (html5
    {:lang "en"}
    (head)
@@ -39,8 +40,10 @@
                 cancer-classes}
       [:div#chart-age-significance]]
      [:div.row {:style {:height "800"}
-                :data-combined-cancer
-                combined-cancer-data}
+                :data-combined-cancer-labels
+                combined-cancer-data-labels
+                :data-combined-cancer-matrix
+                combined-cancer-data-matrix}
       [:div#chart-combined-cancer]]
      [:div.row {:style {:height "800"}
                 :data-bar-chart-cancer-classes

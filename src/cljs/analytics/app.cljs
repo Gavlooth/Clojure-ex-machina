@@ -83,10 +83,18 @@
                    :xaxis {:side "top"
                            :tickangle -40}}))
 
+(defn matrix->lower-triangular  [the-matrix]
+  (vec (map-indexed
+        (fn  [i x]
+          (vec  (map-indexed
+                 (fn [j y] (when-not (< i j) y)) x)))
+        the-matrix)))
+
 (defn corrplot [correlation-data-element
                 correlation-data-labels
-                lower-triangular]
-
+                the-matrix
+                title]
+(let [lower-triangular (matrix->lower-triangular the-matrix)]
   (.plot  js/Plotly correlation-data-element
           (clj->js  [{:colorscale [[0 "#B22222"]
                                    [1 "#20B2AA"]]
@@ -96,23 +104,20 @@
                       :xgap 2
                       :ygap 2
                       :type "heatmap"}])
-          (clj->js  {:title "Correlations bettween variables"
+          (clj->js  {:title title
                      :width 1000
                      :height 1000
                      :margin {:t 300
                               :l 230}
                      :xaxis {:side "top"
-                             :tickangle -40}})))
+                             :tickangle -35}}))))
 
-(defn matrix->lower-triangular  [the-matrix]
-  (vec (map-indexed
-        (fn  [i x]
-          (vec  (map-indexed
-                 (fn [j y] (when-not (< i j) y)) x)))
-        the-matrix)))
 
-(def cor-1 (dm/parent (dm/sel1 :#chart-combined-cancer)))
 
-#_(def cor-1-matrix
-    (parse-data-tag cor-1 "data-combined-cancer"))
+(def combined-cancer-element (dm/parent (dm/sel1 :#chart-combined-cancer)))
 
+
+
+(let [the-matrix (parse-data-tag combined-cancer-element "data-combined-cancer-matrix")
+             the-labels  (clog  (parse-data-tag  combined-cancer-element "data-combined-cancer-labels"))]
+  (corrplot (dm/sel1 :#chart-combined-cancer) the-labels the-matrix  "Correlation with combined test result variable \"cervical cancer\"" ))

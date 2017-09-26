@@ -3,7 +3,7 @@
             [ring.adapter.jetty :as jetty]
             [analytics.views :as views]
             [analytics.data-operations :refer
-             [data-store map->transit-json]]            
+             [data-store map->transit-json]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.defaults :refer [wrap-defaults]]
             [analytics.data-operations :refer
@@ -15,15 +15,16 @@
             [ring.middleware.defaults :refer
              [api-defaults site-defaults wrap-defaults]]))
 
-
 ;;TODO integrate d-o/ as arguments to component
 (defn home-routes []
   (let  [data-NA (map->transit-json (stat-NA d-o/data))
          correlation-data-matrix (map->transit-json d-o/corplot-matrix)
-         combined-cancer-data
-         (build-corplot-matrix
-          reduced-correlations (extract-labels d-o/reduced-data))
+         combined-cancer-data-matrix (map->transit-json  (build-corplot-matrix
+                                                   reduced-correlations
+                                                   (extract-labels d-o/reduced-data)))
+
          correlation-data-labels (map->transit-json d-o/pure-labels)
+        combined-cancer-data-labels (map->transit-json d-o/reduced-labels)
          age-significance-data
          (map->transit-json (map #(select-keys % [:age :servical-cancer])
                                  (reduce-cancer-variables d-o/data-coerced)))]
@@ -32,8 +33,9 @@
                  :data-NA data-NA
                  :age-significance-data age-significance-data
                  :correlation-data-matrix correlation-data-matrix
-                 :combined-cancer-data combined-cancer-data
-                 :correlation-data-labels correlation-data-labels)))))
+                 :combined-cancer-data-matrix combined-cancer-data-matrix
+                 :correlation-data-labels correlation-data-labels
+                 :combined-cancer-data-labels combined-cancer-data-labels )))))
 
 (defn handler []
   (wrap-defaults (#'home-routes)  site-defaults))

@@ -211,7 +211,6 @@
     (map  c-merger data)))
 
 
-
 ;;function to calculate overal percentage of values in data
 (defn calculate-overall-proporsions [data]
   (let [overall  (reduce
@@ -283,6 +282,8 @@
        (partition 36)))
 
 (def reduced-data (reduce-cancer-variables data-coerced))
+
+(def reduced-labels (conj (vec  (remove #{ "Hinselmann" "Schiller" "Citology" "Biopsy" } pure-labels)) "cervical cancer") )
 
 (def reduced-correlations
   (calculate-correlations
