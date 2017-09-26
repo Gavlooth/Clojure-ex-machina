@@ -44,7 +44,8 @@
                 combined-cancer-data-labels
                 :data-combined-cancer-matrix
                 combined-cancer-data-matrix}
-      [:div#chart-combined-cancer]]
+      [:div#chart-combined-cancer]
+      [:div#bar-chart-combined-cancer]]
      [:div.row {:style {:height "800"}
                 :data-bar-chart-cancer-classes
                 cancer-classes}

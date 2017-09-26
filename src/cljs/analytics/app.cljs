@@ -117,7 +117,29 @@
 (def combined-cancer-element (dm/parent (dm/sel1 :#chart-combined-cancer)))
 
 
-
 (let [the-matrix (parse-data-tag combined-cancer-element "data-combined-cancer-matrix")
-             the-labels  (clog  (parse-data-tag  combined-cancer-element "data-combined-cancer-labels"))]
+             the-labels  (parse-data-tag  combined-cancer-element "data-combined-cancer-labels")]
   (corrplot (dm/sel1 :#chart-combined-cancer) the-labels the-matrix  "Correlation with combined test result variable \"cervical cancer\"" ))
+
+
+(defn plot-stack-bar [el labels values hover-text title]
+  "Display the NAs values in a plotly.js bargraph"
+  (let [bar-data [{:x labels
+                   :y values
+                   :type "bar"
+                   :text hover-text
+                   :textposition "auto"
+                   :hoverinfo "none"
+                   ;; :orientation "h"
+                   :marker  {:color "rgb (158,202,225)"
+                             :opacity  0.6
+                             :line  {:color "rbg (8,48,107)" :width 1.5}}}]
+        layout {:title title
+                :margin {:b 150}
+                :xaxis {:tickangle 30}}]
+    (.newPlot js/Plotly el  (clj->js bar-data)  (clj->js layout))))
+
+
+(let [the-labels (drop-last (parse-data-tag  combined-cancer-element "data-combined-cancer-labels"))
+           the-data   (last  (parse-data-tag combined-cancer-element "data-combined-cancer-matrix")) ]
+  (plot-stack-bar  (dm/sel1 :#bar-chart-combined-cancer) the-labels the-data the-data "Correlation between cancer and the variables" ))

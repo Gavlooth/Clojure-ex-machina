@@ -21,7 +21,8 @@
                  [com.cognitect/transit-cljs "0.8.239"]
                  [com.stuartsierra/component.repl "0.2.0"]
                  [com.stuartsierra/component "0.3.2"]
-                 [kixi/stats "0.3.9"]]
+                 [kixi/stats "0.3.9"]
+                 [org.apache.spark/spark-mllib_2.10 "2.2.0"]]
   :plugins [[lein-cljsbuild "1.1.6"]
             [lein-environ "1.1.0"]]
 
