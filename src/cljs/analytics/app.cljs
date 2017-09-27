@@ -1,9 +1,9 @@
 (ns analytics.app
   (:require [dommy.core :as dm]
+            [goog.string :as gstring]
+            [goog.string.format]
             [debux.cs.core :refer-macros [clog clogn break]]
-            [cognitect.transit :as t])
-
-  (:import [goog.string]))
+            [cognitect.transit :as t]))
 
 (enable-console-print!)
 
@@ -124,22 +124,23 @@
 
 (defn plot-stack-bar [el labels values hover-text title]
   "Display the NAs values in a plotly.js bargraph"
-  (let [bar-data [{:x labels
-                   :y values
+  (let [bar-data [{:y labels
+                   :x values
+                   :orientation "h"
                    :type "bar"
                    :text hover-text
                    :textposition "auto"
                    :hoverinfo "none"
-                   ;; :orientation "h"
                    :marker  {:color "rgb (158,202,225)"
                              :opacity  0.6
-                             :line  {:color "rbg (8,48,107)" :width 1.5}}}]
+                             :line  {:color "rbg (8,48,107)" :width 2}}}]
         layout {:title title
-                :margin {:b 150}
-                :xaxis {:tickangle 30}}]
+                :height 1000
+                :margin {:l 260}}]
     (.newPlot js/Plotly el  (clj->js bar-data)  (clj->js layout))))
 
 
 (let [the-labels (drop-last (parse-data-tag  combined-cancer-element "data-combined-cancer-labels"))
-           the-data   (last  (parse-data-tag combined-cancer-element "data-combined-cancer-matrix")) ]
-  (plot-stack-bar  (dm/sel1 :#bar-chart-combined-cancer) the-labels the-data the-data "Correlation between cancer and the variables" ))
+           the-data   (last  (parse-data-tag combined-cancer-element "data-combined-cancer-matrix"))
+          hover-text (map #(gstring/format "%.2f" %) the-data)]
+  (plot-stack-bar  (dm/sel1 :#bar-chart-combined-cancer) the-labels the-data hover-text "Positive cancer and variable correlation" ))
